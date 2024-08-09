@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Location
+from .models import Location, Alert
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,4 +18,9 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
-
+    
+class AlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Alert
+        fields = ['id', 'alert_type', 'location', 'description', 'date']
+        read_only_fields = ['date']

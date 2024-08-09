@@ -3,15 +3,18 @@ from rest_framework import generics, permissions, views
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import status, viewsets
-from .serializers import UserSerializer, LocationSerializer
+from .serializers import UserSerializer, LocationSerializer, AlertSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.views import View
-from .models import Location
-from rest_framework.decorators import action
+from .models import Location, Alert
+from rest_framework.decorators import action,api_view
+from pyfcm import FCMNotification
+from django.conf import settings
+from django.http import JsonResponse
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -91,3 +94,27 @@ class GetLocationView(APIView):
             return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
         except Location.DoesNotExist:
             return Response({'error': 'Location does not exist for this user'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class AlertCreateView(generics.CreateAPIView):
+    queryset = Alert.objects.all()
+    serializer_class = AlertSerializer
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # Disable authentication
+    
+def get_alerts(request):
+    alerts = Alert.objects.all().order_by('-date')
+    data = [{"alert_type": alert.alert_type, "location": alert.location,
+             "description": alert.description, "date": alert.date} for alert in alerts]
+    return JsonResponse(data, safe=False)
+
+class LatestAlertView(APIView):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # Disable authentication
+
+    def get(self, request):
+        latest_alert = Alert.objects.all().order_by('-date').first()
+        if latest_alert:
+            serializer = AlertSerializer(latest_alert)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"detail": "No alerts found."}, status=status.HTTP_404_NOT_FOUND)
