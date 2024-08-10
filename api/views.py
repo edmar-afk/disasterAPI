@@ -12,7 +12,8 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 from .models import Location, Alert
 from rest_framework.decorators import action,api_view
-from pyfcm import FCMNotification
+from django.utils import timezone
+from datetime import timedelta
 from django.conf import settings
 from django.http import JsonResponse
 class CreateUserView(generics.CreateAPIView):
@@ -118,3 +119,31 @@ class LatestAlertView(APIView):
             serializer = AlertSerializer(latest_alert)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"detail": "No alerts found."}, status=status.HTTP_404_NOT_FOUND)
+    
+def check_alerts(request):
+    # Get the timestamp from query parameters (or use a default value)
+    last_check = request.GET.get('last_check', None)
+
+    if last_check:
+        try:
+            last_check_datetime = timezone.datetime.fromisoformat(last_check)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid date format'}, status=400)
+    else:
+        last_check_datetime = timezone.now() - timedelta(minutes=10)  # Default to 10 minutes ago
+
+    # Fetch alerts created after the last check time
+    alerts = Alert.objects.filter(date__gte=last_check_datetime).order_by('-date')
+
+    # Convert to a list of dictionaries
+    data = [
+        {
+            'alert_type': alert.alert_type,
+            'location': alert.location,
+            'description': alert.description,
+            'date': alert.date.isoformat()
+        }
+        for alert in alerts
+    ]
+
+    return JsonResponse(data, safe=False)

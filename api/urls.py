@@ -14,4 +14,5 @@ urlpatterns = [
     path('create-alert/', views.AlertCreateView.as_view(), name='create-alert'),
     path('latest-alert/', views.LatestAlertView.as_view(), name='latest-alert'),
     path('get-alerts/', views.get_alerts, name='get_alerts'),  # Optional: endpoint for fetching alerts
+    path('api/check-alerts/', views.check_alerts, name='check_alerts'),
 ]
