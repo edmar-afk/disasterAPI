@@ -22,5 +22,4 @@ class UserSerializer(serializers.ModelSerializer):
 class AlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alert
-        fields = ['id', 'alert_type', 'location', 'description', 'date']
-        read_only_fields = ['date']
+        fields = ['alert_type', 'location', 'description', 'image', 'date']  # Include the image field

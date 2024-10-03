@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "330222286615",
+    "project_id": "disaster-notification-7984c",
+    "storage_bucket": "disaster-notification-7984c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330222286615:android:da76ae8d29d3f34e752952",
+        "android_client_info": {
+          "package_name": "com.example.disaster_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsc3BVVQ-iXP6FuiIX5Uzz8tGpTWb0UQM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

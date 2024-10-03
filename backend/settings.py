@@ -55,7 +55,14 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'corsheaders', 
+
 ]
+
+# settings.py
+
+ONESIGNAL_APP_ID = '607cafd9-81f5-40df-a908-b938cd94a479'
+ONESIGNAL_API_KEY = 'ODczZmU3ODUtOTAyOS00Nzg0LTkzNTAtYTk0ZWU3Njg2ZDEz'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

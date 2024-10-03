@@ -19,6 +19,7 @@ class Alert(models.Model):
     location = models.TextField()
     description = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
-    
+    image = models.ImageField(upload_to='alerts/', blank=True, null=True)  # Add this line
+
     def __str__(self):
         return self.location

@@ -16,6 +16,9 @@ from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
 from django.http import JsonResponse
+import requests
+from django.conf import settings
+
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -97,17 +100,54 @@ class GetLocationView(APIView):
             return Response({'error': 'Location does not exist for this user'}, status=status.HTTP_404_NOT_FOUND)
         
 
+
+
 class AlertCreateView(generics.CreateAPIView):
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
     permission_classes = [permissions.AllowAny]
-    authentication_classes = []  # Disable authentication
+
+    def perform_create(self, serializer):
+        alert = serializer.save()
+
+        # Prepare notification content
+        notification_content = (
+            f"New Alert: {alert.alert_type} in {alert.location}\n\n"
+            f"Description:\n{alert.description}"
+        )
+
+        # Prepare OneSignal notification payload
+        notification_data = {
+            "app_id": settings.ONESIGNAL_APP_ID,
+            "included_segments": ["All"],  # Target all users
+            "contents": {"en": notification_content},
+            "headings": {"en": "New Alert From Lakewood Disaster App"},
+            "data": {
+                "alert_type": alert.alert_type,
+                "location": alert.location,
+                "description": alert.description,
+                "date": str(alert.date)
+            },
+            "big_picture": alert.image.url if alert.image else None,  # Send image URL if present
+        }
+
+        # Send notification to OneSignal
+        headers = {
+            "Authorization": f"Basic {settings.ONESIGNAL_API_KEY}",
+            "Content-Type": "application/json; charset=utf-8",
+        }
+        response = requests.post("https://onesignal.com/api/v1/notifications", json=notification_data, headers=headers)
+
+        return JsonResponse({"message": "Alert created successfully."}, status=201)
     
+
+# View to get all alerts
 def get_alerts(request):
     alerts = Alert.objects.all().order_by('-date')
     data = [{"alert_type": alert.alert_type, "location": alert.location,
              "description": alert.description, "date": alert.date} for alert in alerts]
     return JsonResponse(data, safe=False)
+
 
 class LatestAlertView(APIView):
     permission_classes = [permissions.AllowAny]
