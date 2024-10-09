@@ -119,7 +119,7 @@ class AlertCreateView(generics.CreateAPIView):
         # Prepare OneSignal notification payload
         notification_data = {
             "app_id": settings.ONESIGNAL_APP_ID,
-            "included_segments": ["All"],  # Target all users
+            "included_segments": ["All"],
             "contents": {"en": notification_content},
             "headings": {"en": "New Alert From Lakewood Disaster App"},
             "data": {
@@ -128,7 +128,12 @@ class AlertCreateView(generics.CreateAPIView):
                 "description": alert.description,
                 "date": str(alert.date)
             },
-            "big_picture": alert.image.url if alert.image else None,  # Send image URL if present
+            "android": {
+                "big_picture": alert.image.url if alert.image else None,
+            },
+            "ios": {
+                "big_picture": alert.image.url if alert.image else None,
+            },
         }
 
         # Send notification to OneSignal
@@ -137,6 +142,9 @@ class AlertCreateView(generics.CreateAPIView):
             "Content-Type": "application/json; charset=utf-8",
         }
         response = requests.post("https://onesignal.com/api/v1/notifications", json=notification_data, headers=headers)
+
+        # Debug response
+        print(response.json())  # Print the response from OneSignal
 
         return JsonResponse({"message": "Alert created successfully."}, status=201)
     
