@@ -33,7 +33,7 @@ class CreateUserView(generics.CreateAPIView):
        
         # Check if the username, email, or mobile number already exists
         if User.objects.filter(username=username).exists():
-            raise ValidationError({'username': 'A user with this Mobile Number already exists.'})
+            raise ValidationError({'username': 'A user with this Email already exists.'})
 
         if User.objects.filter(email=email).exists():
             raise ValidationError({'email': 'A user with this email already exists.'})
